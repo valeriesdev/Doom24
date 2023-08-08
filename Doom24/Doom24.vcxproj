@@ -18,6 +18,16 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\Downloads\dmath.c" />
+    <ClCompile Include="..\..\..\..\Downloads\main.c" />
+    <ClCompile Include="..\..\..\..\Downloads\queue.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\Downloads\dmath.h" />
+    <ClInclude Include="..\..\..\..\Downloads\main.h" />
+    <ClInclude Include="..\..\..\..\Downloads\queue.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
@@ -137,16 +147,6 @@
       <AdditionalLibraryDirectories>C:\clib\SDL\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\..\..\Downloads\dmath.h" />
-    <ClInclude Include="..\..\..\..\Downloads\main.h" />
-    <ClInclude Include="..\..\..\..\Downloads\queue.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\..\..\Downloads\dmath.c" />
-    <ClCompile Include="..\..\..\..\Downloads\main.c" />
-    <ClCompile Include="..\..\..\..\Downloads\queue.c" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
