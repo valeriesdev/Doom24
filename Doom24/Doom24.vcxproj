@@ -19,14 +19,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\Downloads\dmath.c" />
-    <ClCompile Include="..\..\..\..\Downloads\main.c" />
-    <ClCompile Include="..\..\..\..\Downloads\queue.c" />
+    <ClCompile Include="dmath.c" />
+    <ClCompile Include="main.c" />
+    <ClCompile Include="queue.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\Downloads\dmath.h" />
-    <ClInclude Include="..\..\..\..\Downloads\main.h" />
-    <ClInclude Include="..\..\..\..\Downloads\queue.h" />
+    <ClInclude Include="dmath.h" />
+    <ClInclude Include="main.h" />
+    <ClInclude Include="queue.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
