@@ -8,6 +8,7 @@
 #include "dmath.h"
 #include "queue.h"
 #include "main.h"
+#include "create_map.h"
 
 #define SCREEN_WIDTH 384
 #define SCREEN_HEIGHT 216
@@ -36,8 +37,8 @@ struct {
 
     node_t* queue_head;
 
-    struct { struct sector arr[32]; size_t n; } sectors;
-    struct { struct wall arr[128];  size_t n; } walls;
+    struct sector_group { struct sector arr[32]; size_t n; } sectors;
+    struct wall_group { struct wall arr[128];  size_t n; } walls;
 
     struct {
         v2 pos;
@@ -72,14 +73,15 @@ static void render_sector(uint8_t sector, v2 xa, v2 xb, v2 ya, v2 yb, uint8_t vi
 
         // Cast rays out from the camera at a 90 degree angle and get the intersection between those rays and the wall
         float l = 25;                                                                                             // How long the rays should b e
-        float cos_x = l * qsin(PI_2 - state.camera.angle + PI) + state.camera.pos.x;                            // math
-        float cos_y = l * qsin(PI_2 - state.camera.angle + PI) + state.camera.pos.y;                            // math
-        float sin_x = l * qsin(-state.camera.angle + PI) + state.camera.pos.x;                                  // math
-        float sin_y = l * qsin(state.camera.angle + PI) + state.camera.pos.y;                                   // math
-        //v2 intersection_h = intersect_segs((v2) { cos_x, sin_y }, (v2) { ncos_x, nsin_y }, cWall->a, cWall->b);   // Intersection between the wall and the horz line
-        //v2 intersection_v = intersect_segs((v2) { sin_x, cos_y }, (v2) { nsin_x, ncos_y }, cWall->a, cWall->b);   // Intersection between the wall and the vert line
-        v2 intersection_h = intersect_segs((v2) { cos_x, sin_y }, (v2) { state.camera.pos.x, state.camera.pos.y }, cWall->a, cWall->b);   // Intersection between the wall and the horz line
-        v2 intersection_v = intersect_segs((v2) { sin_x, cos_y }, (v2) { state.camera.pos.x, state.camera.pos.y }, cWall->a, cWall->b);   // Intersection between the wall and the vert line
+        float cos_x = l * sinf(PI_2 - state.camera.angle + PI) + state.camera.pos.x;                            // math
+        float cos_y = l * sinf(PI_2 - state.camera.angle + PI) + state.camera.pos.y;                            // math
+        float sin_x = l * sinf(-state.camera.angle + PI) + state.camera.pos.x;                                  // math
+        float sin_y = l * sinf(state.camera.angle + PI) + state.camera.pos.y;                                   // math
+        v2 intersection_h = intersect_segs((v2) { cos_x, sin_y }, (v2) { cos_x, sin_y
+        }, cWall->a, cWall->b);   // Intersection between the wall and the horz line
+        v2 intersection_v = intersect_segs((v2) { sin_x, cos_y }, (v2) { sin_x, cos_y }, cWall->a, cWall->b);   // Intersection between the wall and the vert line
+        //v2 intersection_h = intersect_segs((v2) { cos_x, sin_y }, (v2) { state.camera.pos.x, state.camera.pos.y }, cWall->a, cWall->b);   // Intersection between the wall and the horz line
+        //v2 intersection_v = intersect_segs((v2) { sin_x, cos_y }, (v2) { state.camera.pos.x, state.camera.pos.y }, cWall->a, cWall->b);   // Intersection between the wall and the vert line
 
         // Get the grid points where the wall should be rendered between
         // If wall is contained entirely on screen draw between endpoints
@@ -88,8 +90,7 @@ static void render_sector(uint8_t sector, v2 xa, v2 xb, v2 ya, v2 yb, uint8_t vi
         v2 pointa, pointb;
         pointb = cWall->b;
         pointa = cWall->a;
-        //printf("%f %f | %f %f |X| ", cos_x, sin_y, sin_x, cos_y);
-        //printf("%f %f | %f %f | %f %f | %f\n", intersection_h.x, intersection_h.y, intersection_v.x, intersection_v.y, state.camera.pos.x, state.camera.pos.y, state.camera.angle);
+
         if (compare_v2(intersection_h) && compare_v2(intersection_v)) {
             //printf("zzzz");
             pointa = intersection_v;
@@ -119,8 +120,6 @@ static void render_sector(uint8_t sector, v2 xa, v2 xb, v2 ya, v2 yb, uint8_t vi
         for (int k = 0; k < steps; k++) {
             v2 point = (v2){ pointb.x + (pointa.x - pointb.x) * k / steps, pointb.y + (pointa.y - pointb.y) * k / steps };
 
-            //printf("%f \n", qabs(normalize_a(angle_between_points(state.camera.pos, point) + state.camera.angle)- normalize_a(atan2(state.camera.pos.y + point.y, state.camera.pos.x + point.x) + state.camera.angle)));
-            //float angle = normalize_a(angle_between_points(state.camera.pos, point) + state.camera.angle);
             float angle = normalize_a(angle_between_points( state.camera.pos, point ) + state.camera.angle);
             if (angle > PI_2 || angle < 0) continue;
 
@@ -189,6 +188,14 @@ static void render() {
 }
 
 int main(int argc, char* argv[]) {
+    char value = ' ';
+    printf("Launch file creator? (Y/N) ");
+    int a = scanf(" %c", &value);
+    if (value == 'Y') {
+        file_creator();
+        return 0;
+    }
+
     SDL_SetMainReady();
 
     ASSERT(!SDL_Init(SDL_INIT_VIDEO), "SDL failed to initialize: %s\n", SDL_GetError());
@@ -208,26 +215,18 @@ int main(int argc, char* argv[]) {
     ASSERT(state.pixels != NULL, "MEMORY FAILURE");
     state.colormode = 1;
 
-    state.sectors.n = 2;
-    state.sectors.arr[0].firstwall = 0;
-    state.sectors.arr[0].id = 0;
-    state.sectors.arr[0].nwalls = 5;
+    struct map {
+        struct sector_group sectors;
+        struct wall_group walls;
+    };
 
-    state.sectors.arr[1].firstwall = 5;
-    state.sectors.arr[1].id = 1;
-    state.sectors.arr[1].nwalls = 4;
+    struct map loaded_map;
+    FILE* ptr;
+    ptr = fopen("map.bin", "rb");  // r for read, b for binary
+    fread(&loaded_map, sizeof(loaded_map), 1, ptr);
 
-    state.walls.n = 9;
-    state.walls.arr[0] = (struct wall){ (v2) { 0.0,0.0 }, (v2) { 0.0,5.0 }, 0, -1, -1, 0xFF000000 };
-    state.walls.arr[1] = (struct wall){ (v2) { 0.0,5.0 }, (v2) { 3.0,10.0 }, 0, -1, -1, 0xFFFF0000 };
-    state.walls.arr[2] = (struct wall){ (v2) { 3.0,10.0 }, (v2) { 10.0,10.0 }, 1, 1 , 5 , 0x00000000 };
-    state.walls.arr[3] = (struct wall){ (v2) { 10.0,10.0 }, (v2) { 10.0,0.0 }, 0, -1, -1, 0xFF00FF00 };
-    state.walls.arr[4] = (struct wall){ (v2) { 10.0,0.0 }, (v2) { 0.0,0.0 }, 0, -1, -1, 0xFFFFAAAA };
-
-    state.walls.arr[5] = (struct wall){ (v2) { 3.0,10.0 }, (v2) { 10.0,10.0 }, 1, 0 , 2 , 0x00000000 };
-    state.walls.arr[6] = (struct wall){ (v2) { 10.0,10.0 }, (v2) { 13.0,15.0 }, 0, -1, -1, 0xFFFFFFFF };
-    state.walls.arr[7] = (struct wall){ (v2) { 13.0,15.0 }, (v2) { 1.5,15.0 }, 0, -1, -1, 0xFF0000FF };
-    state.walls.arr[8] = (struct wall){ (v2) { 1.5,15.0 }, (v2) { 3.0,10.0 }, 0, -1, -1, 0xFFAAAAFF };
+    state.sectors = loaded_map.sectors;
+    state.walls = loaded_map.walls;
 
     while (!state.quit) {
         SDL_Event ev;

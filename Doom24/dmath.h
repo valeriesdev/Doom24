@@ -26,18 +26,7 @@ typedef struct v2i { int32_t x, y; } v2i;
 
 // Mathematical approximations
 #define qabs(v) (((v) >= 0) ? (v) : -(v))
-#define qcos(v) (qsin(PI_2-(v)))
-#define qarcsin(v) (1.05938*v - 0.235601*v*v*v + 0.613381*v*v*v*v*v)
-//#define qarccos(v) (-1.05938*v + 0.235601*v*v*v - 0.613381*v*v*v*v*v + 1.5708)
-//#define qabs(v) (fabsf(v))
-//#define qsin(v) (sin(v))
-//#define qcos(v) (cos(v))
-//#define qarccos(v) (acos(v))
 
-float fast_acos(float a);
 v2 intersect_segs(v2 a0, v2 a1, v2 b0, v2 b1);
 float angle_between_points(v2 a, v2 b);
 v2 rotate_about(v2 a, v2 center, float angle);
-float fast_qsqrt(float number);
-inline float qarccos(float v);
-inline float qsin(float v);

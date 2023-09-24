@@ -1,0 +1,1 @@
+int load_sectors(const char* path);
